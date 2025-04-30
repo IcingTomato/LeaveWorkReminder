@@ -59,3 +59,10 @@ gcc leaveWork_task.c -o leaveWork_task.exe -ladvapi32 -lcomctl32 -lgdi32 -luxthe
 
 建议使用管理员权限运行此脚本，以确保任务计划程序权限足够。
 
+## Todo
+
+- [x] 自动<kbd>Ctrl</kbd>+<kbd>S</kbd>保存当前工作
+- [x] 自动弹出贪吃蛇、俄罗斯方块等小游戏
+- [x] 到时间自动关机
+- [ ] 其他平台支持（Linux、MacOS）
+- [ ] 其他语言支持（Python、Java、Go、Rust等）
