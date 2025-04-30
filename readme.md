@@ -2,7 +2,7 @@
 
 到时间就要下班，老板不爱你的！
 
-![](./img/LWR.gif)
+<img src="./img/LWR.gif" alt="meme" width="200">
 
 ## 介绍
 
