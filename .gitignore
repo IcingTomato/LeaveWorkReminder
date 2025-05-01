@@ -1,0 +1,5 @@
+# VS Code 设置文件
+.vscode
+
+# 上传脚本
+cls_env.ps1
