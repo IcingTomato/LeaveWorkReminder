@@ -112,7 +112,7 @@ LRESULT CALLBACK CountdownWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
                 if (pData->remainingSeconds <= 0)
                 {
                     KillTimer(hwnd, TIMER_ID);
-                    MessageBox(hwnd, "开润！\n请立即关闭计算机！", "警告", MB_ICONWARNING | MB_OK);
+                    MessageBox(hwnd, "开润！\n请立即关闭计算机！", "警告", MB_ICONERROR | MB_OK);
                     DestroyWindow(hwnd);
                 }
             }
