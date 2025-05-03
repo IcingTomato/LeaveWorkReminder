@@ -60,13 +60,13 @@ gcc leaveWork_task.c -o leaveWork_task.exe -ladvapi32 -lcomctl32 -lgdi32 -luxthe
 
 建议使用管理员权限运行此脚本，以确保任务计划程序权限足够。
 
-## 兼容性
+## 兼容性（测试过的操作系统）
 
 - [ ] Windows XP 64位
-- [x] Windows 7 64位
-- [x] Windows 8/8.1 64位
+- [ ] Windows 7 64位
+- [ ] Windows 8/8.1 64位
 - [x] Windows 10 64位
-- [x] Windows 11 64位
+- [ ] Windows 11 64位
 
 
 ## Todo
