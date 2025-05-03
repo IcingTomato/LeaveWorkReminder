@@ -86,3 +86,4 @@ gcc leaveWork_task.c -o leaveWork_task.exe -ladvapi32 -lcomctl32 -lgdi32 -luxthe
 - [Windows API](https://learn.microsoft.com/en-us/windows/win32/apiindex/windows-api-list)
 - [Windows Task Scheduler](https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page)
 - [Windows GDI+](https://learn.microsoft.com/en-us/windows/win32/gdi/windows-gdi)
+- [shlobj.h header](https://learn.microsoft.com/en-us/windows/win32/api/shlobj/)
