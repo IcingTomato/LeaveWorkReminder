@@ -2,7 +2,7 @@
 
 到时间就要下班，老板不爱你的！
 
-<img src="./img/LWR.gif" alt="meme" width="300">
+<img src="./img/1.png" alt="meme" width="450">
 
 ## 介绍
 
@@ -74,7 +74,7 @@ gcc leaveWork_task.c -o leaveWork_task.exe -ladvapi32 -lcomctl32 -lgdi32 -luxthe
 - [ ] 自动弹出贪吃蛇、俄罗斯方块等小游戏
 - [ ] 到时间自动关机
 - [ ] 其他平台支持（Linux、MacOS）
-- [ ] 其他语言支持（Python、Java、Go、Rust等）
+- [ ] <s>其他语言支持（Python、Java、Go、Rust等）</s>
 
 ## 已完成的功能
 
