@@ -71,7 +71,7 @@ gcc leaveWork_task.c -o leaveWork_task.exe -ladvapi32 -lcomctl32 -lgdi32 -luxthe
 
 ## Todo
 
-- [ ] 自动弹出贪吃蛇、俄罗斯方块等小游戏
+- [x] 自动弹出贪吃蛇、俄罗斯方块等小游戏
 - [ ] 到时间自动关机
 - [ ] 其他平台支持（Linux、MacOS）
 - [ ] <s>其他语言支持（Python、Java、Go、Rust等）</s>
@@ -87,6 +87,10 @@ gcc leaveWork_task.c -o leaveWork_task.exe -ladvapi32 -lcomctl32 -lgdi32 -luxthe
 - [Windows Task Scheduler](https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page)
 - [Windows GDI+](https://learn.microsoft.com/en-us/windows/win32/gdi/windows-gdi)
 - [shlobj.h header](https://learn.microsoft.com/en-us/windows/win32/api/shlobj/)
+
+## 许可协议
+
+[MIT](https://github.com/IcingTomato/LeaveWorkReminder/blob/master/LICENSE)
 
 ## Bugs Fixes
 
