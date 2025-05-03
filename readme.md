@@ -6,7 +6,8 @@
 
 ## 介绍
 
-值此五一佳节，为了庆祝996连续工作12天从而换得五天假期，去庆祝这个纪念工人获得八小时工作制的节日，特意写了这个小工具。
+值此五一佳节，为了庆祝996连续工作12天从而换得五天假期，去纪念工人获得八小时工作制的节日，特意写了这个小工具。
+
 它会在你下班时间到达之际，弹出一个窗口提醒你应该润了，因为不润的话，不仅没有加班工资，而且加班时长不一定能变成调休。
 
 ## 编译（Windows环境 + MSYS2）：
@@ -59,6 +60,15 @@ gcc leaveWork_task.c -o leaveWork_task.exe -ladvapi32 -lcomctl32 -lgdi32 -luxthe
 
 建议使用管理员权限运行此脚本，以确保任务计划程序权限足够。
 
+## 兼容性
+
+- [ ] Windows XP 64位
+- [x] Windows 7 64位
+- [x] Windows 8/8.1 64位
+- [x] Windows 10 64位
+- [x] Windows 11 64位
+
+
 ## Todo
 
 - [ ] 自动弹出贪吃蛇、俄罗斯方块等小游戏
@@ -69,7 +79,7 @@ gcc leaveWork_task.c -o leaveWork_task.exe -ladvapi32 -lcomctl32 -lgdi32 -luxthe
 ## 已完成的功能
 
 - [x] 自动<kbd>Ctrl</kbd>+<kbd>S</kbd>保存当前工作
-- [x] 屏幕截图（多显示屏不兼容）
+- [x] 屏幕截图（多<s>显示屏</s>监视器不兼容）
 
 ## Reference
 
