@@ -79,7 +79,7 @@ gcc leaveWork_task.c -o leaveWork_task.exe -ladvapi32 -lcomctl32 -lgdi32 -luxthe
 ## 已完成的功能
 
 - [x] 自动<kbd>Ctrl</kbd>+<kbd>S</kbd>保存当前工作
-- [x] 屏幕截图（多<s>显示屏</s>监视器不兼容）
+- [x] 屏幕截图（全屏）
 
 ## Reference
 
@@ -87,3 +87,7 @@ gcc leaveWork_task.c -o leaveWork_task.exe -ladvapi32 -lcomctl32 -lgdi32 -luxthe
 - [Windows Task Scheduler](https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page)
 - [Windows GDI+](https://learn.microsoft.com/en-us/windows/win32/gdi/windows-gdi)
 - [shlobj.h header](https://learn.microsoft.com/en-us/windows/win32/api/shlobj/)
+
+## Bugs Fixes
+
+- [x] 解决了多显示器/高分屏下截图不全的问题（DPI感知问题）[e026e3b](https://github.com/IcingTomato/LeaveWorkReminder/commit/e026e3b39eba0b5f276b44e0e9e63439d03b5067)
