@@ -70,3 +70,9 @@ gcc leaveWork_task.c -o leaveWork_task.exe -ladvapi32 -lcomctl32 -lgdi32 -luxthe
 
 - [x] 自动<kbd>Ctrl</kbd>+<kbd>S</kbd>保存当前工作
 - [x] 屏幕截图（多显示屏不兼容）
+
+## Reference
+
+- [Windows API](https://learn.microsoft.com/en-us/windows/win32/apiindex/windows-api-list)
+- [Windows Task Scheduler](https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page)
+- [Windows GDI+](https://learn.microsoft.com/en-us/windows/win32/gdi/windows-gdi)
