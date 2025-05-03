@@ -349,11 +349,41 @@ void updateGame()
             break;
     }
     
-    // 移动蛇身（除去最后一节）
-    for (int i = snake.length - 1; i > 0; i--) 
-    {
-        snake.x[i] = snake.x[i - 1];
-        snake.y[i] = snake.y[i - 1];
+    // 检查是否吃到食物
+    bool ate = (newX == food.x && newY == food.y);
+    
+    // 如果没有吃到食物，则移动蛇身（除去最后一节）
+    if (!ate) {
+        // 移动蛇身，但保留最后一节的位置（用于增长）
+        for (int i = snake.length - 1; i > 0; i--) 
+        {
+            snake.x[i] = snake.x[i - 1];
+            snake.y[i] = snake.y[i - 1];
+        }
+    } else {
+        // 如果吃到食物，移动现有蛇身，但保留蛇尾位置
+        int tailX = snake.x[snake.length - 1];
+        int tailY = snake.y[snake.length - 1];
+        
+        // 移动现有身体部分
+        for (int i = snake.length - 1; i > 0; i--) 
+        {
+            snake.x[i] = snake.x[i - 1];
+            snake.y[i] = snake.y[i - 1];
+        }
+        
+        // 增加长度
+        snake.length++;
+        
+        // 将新的蛇尾部分设置为之前蛇尾的位置
+        snake.x[snake.length - 1] = tailX;
+        snake.y[snake.length - 1] = tailY;
+        
+        // 增加得分
+        score += 10;
+        
+        // 生成新的食物
+        generateFood();
     }
     
     // 更新蛇头位置
@@ -377,19 +407,6 @@ void updateGame()
     else if (snake.y[0] >= HEIGHT) 
     {
         snake.y[0] = 0;          // 从下边出去，从上边进来
-    }
-    
-    // 检查是否吃到食物
-    if (snake.x[0] == food.x && snake.y[0] == food.y) 
-    {
-        // 增加得分
-        score += 10;
-        
-        // 增加蛇的长度
-        snake.length++;
-        
-        // 生成新的食物
-        generateFood();
     }
     
     // 检查碰撞

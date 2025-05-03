@@ -11,8 +11,9 @@ gcc snake.c -o snake -IC:/msys64/ucrt64/x86_64-w64-mingw32/include/SDL2 -LC:/msy
 ### 下载 SDL2
 
 - [SDL2](https://github.com/libsdl-org/SDL/releases/tag/release-2.32.4) 2.32.4
+- [SDL2_ttf](https://github.com/libsdl-org/SDL_ttf/releases/tag/release-2.24.0)
 
-需要下载 `SDL2-devel-2.32.4-mingw.zip`
+需要下载 `SDL2-devel-2.32.4-mingw.zip` 和 `SDL2_ttf-devel-2.24.0-mingw.zip` 这两个文件。
 
 ### 解压复制
 
