@@ -39,4 +39,5 @@ gcc snake.c -o snake -IC:/msys64/ucrt64/x86_64-w64-mingw32/include/SDL2 -LC:/msy
 
 ## Bugs Fixes
 
-- [x] 解决了在🐍吃到🍎后，屏幕会闪烁一下暗戳戳显示游戏开始界面的问题。
+- [x] 解决了在🐍吃到🍎后，屏幕会闪烁一下暗戳戳显示游戏开始界面的问题。 [
+be8e677](https://github.com/IcingTomato/LeaveWorkReminder/tree/be8e677b5f2c2b5ddfdd71f9e6a7822184dcf170)

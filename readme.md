@@ -66,8 +66,7 @@ gcc leaveWork_task.c -o leaveWork_task.exe -ladvapi32 -lcomctl32 -lgdi32 -luxthe
 - [ ] Windows 7 64位
 - [ ] Windows 8/8.1 64位
 - [x] Windows 10 64位
-- [ ] Windows 11 64位
-
+- [x] Windows 11 64位
 
 ## Todo
 
