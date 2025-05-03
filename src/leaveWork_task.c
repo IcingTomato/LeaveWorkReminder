@@ -3,10 +3,19 @@
 #include <time.h>
 #include <commctrl.h>
 #include <uxtheme.h>
+#include <gdiplus.h>     // 添加GDI+支持
+#include <shlobj.h>      // 获取特殊文件夹路径
+#include <Windowsx.h>    // 使用GDI+函数
+
+#pragma comment(lib, "gdiplus.lib")
 
 #define COUNTDOWN_SECONDS 120 // 倒计时总秒数（2分钟）
 #define TIMER_ID 1
 #define WM_APP_INIT_COUNTDOWN (WM_APP + 1)
+
+void SimulateCtrlS(void);
+void CaptureScreenToDesktop(void);
+int GetEncoderClsid(const WCHAR* format, CLSID* pClsid);
 
 // 倒计时窗口数据
 typedef struct {
@@ -73,6 +82,12 @@ LRESULT CALLBACK CountdownWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
             break;
             
         case WM_APP_INIT_COUNTDOWN:
+             // 模拟Ctrl+S保存当前工作
+            SimulateCtrlS();
+    
+            // 截取屏幕并保存到桌面
+            CaptureScreenToDesktop();
+
             // 开始计时器
             SetTimer(hwnd, TIMER_ID, 1000, NULL);
             
@@ -149,6 +164,126 @@ LRESULT CALLBACK CountdownWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
             return DefWindowProc(hwnd, msg, wParam, lParam);
     }
     return 0;
+}
+
+// 模拟Ctrl+S保存操作
+void SimulateCtrlS() {
+    // 准备按键事件
+    INPUT inputs[4] = {0};
+    
+    // 按下Ctrl键
+    inputs[0].type = INPUT_KEYBOARD;
+    inputs[0].ki.wVk = VK_CONTROL;
+    
+    // 按下S键
+    inputs[1].type = INPUT_KEYBOARD;
+    inputs[1].ki.wVk = 'S';
+    
+    // 释放S键
+    inputs[2].type = INPUT_KEYBOARD;
+    inputs[2].ki.wVk = 'S';
+    inputs[2].ki.dwFlags = KEYEVENTF_KEYUP;
+    
+    // 释放Ctrl键
+    inputs[3].type = INPUT_KEYBOARD;
+    inputs[3].ki.wVk = VK_CONTROL;
+    inputs[3].ki.dwFlags = KEYEVENTF_KEYUP;
+    
+    // 发送按键事件
+    SendInput(4, inputs, sizeof(INPUT));
+    
+    // 稍微等待一下让保存操作完成
+    Sleep(500);
+}
+
+// 截取全屏并保存到桌面
+void CaptureScreenToDesktop() {
+    WCHAR desktopPath[MAX_PATH];
+    WCHAR fileName[MAX_PATH];
+    time_t now;
+    struct tm *local_time;
+    
+    // 获取当前时间
+    time(&now);
+    local_time = localtime(&now);
+    
+    // 获取桌面路径
+    if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_DESKTOP, NULL, 0, desktopPath))) {
+        // 创建文件名 (格式: YYYY-MM-DD.png)
+        swprintf(fileName, MAX_PATH, L"%s\\%04d-%02d-%02d.png", 
+                 desktopPath, 
+                 local_time->tm_year+1900, 
+                 local_time->tm_mon+1, 
+                 local_time->tm_mday);
+        
+        // 初始化GDI+
+        ULONG_PTR gdiplusToken;
+        GdiplusStartupInput gdiplusStartupInput;
+        ZeroMemory(&gdiplusStartupInput, sizeof(GdiplusStartupInput));
+        gdiplusStartupInput.GdiplusVersion = 1;
+        GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+        
+        // 获取虚拟屏幕尺寸（所有显示器的组合区域）
+        int screenWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+        int screenHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+        int screenLeft = GetSystemMetrics(SM_XVIRTUALSCREEN);
+        int screenTop = GetSystemMetrics(SM_YVIRTUALSCREEN);
+        
+        // 创建兼容DC和位图
+        HDC hdcScreen = GetDC(NULL);
+        HDC hdcMemDC = CreateCompatibleDC(hdcScreen);
+        HBITMAP hbmScreen = CreateCompatibleBitmap(hdcScreen, screenWidth, screenHeight);
+        SelectObject(hdcMemDC, hbmScreen);
+        
+        // 复制屏幕内容到位图，使用虚拟屏幕坐标
+        BitBlt(hdcMemDC, 0, 0, screenWidth, screenHeight, 
+               hdcScreen, screenLeft, screenTop, SRCCOPY);
+        
+        // 使用GDI+保存图像
+        CLSID pngClsid;
+        GetEncoderClsid(L"image/png", &pngClsid);
+        
+        // 使用C风格的GDI+ API
+        GpBitmap* bitmap;
+        GdipCreateBitmapFromHBITMAP(hbmScreen, NULL, &bitmap);
+        GdipSaveImageToFile(bitmap, fileName, &pngClsid, NULL);
+        GdipDisposeImage(bitmap);
+        
+        // 清理
+        ReleaseDC(NULL, hdcScreen);
+        DeleteDC(hdcMemDC);
+        DeleteObject(hbmScreen);
+        GdiplusShutdown(gdiplusToken);
+    }
+}
+
+// 获取编码器CLSID的辅助函数
+int GetEncoderClsid(const WCHAR* format, CLSID* pClsid) {
+    UINT num = 0;          // 编码器数量
+    UINT size = 0;         // 编码器数组大小
+    
+    // 获取图像编码器数量和大小
+    GetImageEncodersSize(&num, &size);
+    if(size == 0) return -1;
+    
+    // 分配内存
+    ImageCodecInfo* pImageCodecInfo = (ImageCodecInfo*)(malloc(size));
+    if(pImageCodecInfo == NULL) return -1;
+    
+    // 获取编码器信息
+    GetImageEncoders(num, size, pImageCodecInfo);
+    
+    // 寻找匹配的编码器
+    for(UINT j = 0; j < num; ++j) {
+        if(wcscmp(pImageCodecInfo[j].MimeType, format) == 0) {
+            *pClsid = pImageCodecInfo[j].Clsid;
+            free(pImageCodecInfo);
+            return j;
+        }
+    }
+    
+    free(pImageCodecInfo);
+    return -1;
 }
 
 // 主函数

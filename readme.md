@@ -12,7 +12,7 @@
 ## 编译（Windows环境 + MSYS2）：
 
 ```powershell
-gcc leaveWork_task.c -o leaveWork_task.exe -ladvapi32 -lcomctl32 -lgdi32 -luxtheme -mwindows
+gcc leaveWork_task.c -o leaveWork_task.exe -ladvapi32 -lcomctl32 -lgdi32 -luxtheme -lgdiplus -mwindows
 ```
 
 > 注意：使用-mwindows而不是-mconsole
@@ -61,8 +61,12 @@ gcc leaveWork_task.c -o leaveWork_task.exe -ladvapi32 -lcomctl32 -lgdi32 -luxthe
 
 ## Todo
 
-- [x] 自动<kbd>Ctrl</kbd>+<kbd>S</kbd>保存当前工作
-- [x] 自动弹出贪吃蛇、俄罗斯方块等小游戏
-- [x] 到时间自动关机
+- [ ] 自动弹出贪吃蛇、俄罗斯方块等小游戏
+- [ ] 到时间自动关机
 - [ ] 其他平台支持（Linux、MacOS）
 - [ ] 其他语言支持（Python、Java、Go、Rust等）
+
+## 已完成的功能
+
+- [x] 自动<kbd>Ctrl</kbd>+<kbd>S</kbd>保存当前工作
+- [x] 屏幕截图（多显示屏不兼容）
