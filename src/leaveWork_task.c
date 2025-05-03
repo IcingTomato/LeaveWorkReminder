@@ -167,7 +167,8 @@ LRESULT CALLBACK CountdownWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 }
 
 // 模拟Ctrl+S保存操作
-void SimulateCtrlS() {
+void SimulateCtrlS() 
+{
     // 准备按键事件
     INPUT inputs[4] = {0};
     
@@ -197,7 +198,35 @@ void SimulateCtrlS() {
 }
 
 // 截取全屏并保存到桌面
-void CaptureScreenToDesktop() {
+void CaptureScreenToDesktop() 
+{
+    // 临时启用DPI感知
+    BOOL wasPerMonitorDpiAware = FALSE;
+    HMODULE hUser32 = LoadLibrary("user32.dll");
+    if (hUser32) 
+    {
+        typedef BOOL(WINAPI* AreDpiAwarenessContextsEqualFunc)(DPI_AWARENESS_CONTEXT, DPI_AWARENESS_CONTEXT);
+        typedef DPI_AWARENESS_CONTEXT(WINAPI* GetThreadDpiAwarenessContextFunc)();
+        typedef DPI_AWARENESS_CONTEXT(WINAPI* SetThreadDpiAwarenessContextFunc)(DPI_AWARENESS_CONTEXT);
+        
+        AreDpiAwarenessContextsEqualFunc areDpiAwarenessContextsEqual = 
+            (AreDpiAwarenessContextsEqualFunc)GetProcAddress(hUser32, "AreDpiAwarenessContextsEqual");
+        GetThreadDpiAwarenessContextFunc getThreadDpiAwarenessContext = 
+            (GetThreadDpiAwarenessContextFunc)GetProcAddress(hUser32, "GetThreadDpiAwarenessContext");
+        SetThreadDpiAwarenessContextFunc setThreadDpiAwarenessContext = 
+            (SetThreadDpiAwarenessContextFunc)GetProcAddress(hUser32, "SetThreadDpiAwarenessContext");
+            
+        if (areDpiAwarenessContextsEqual && getThreadDpiAwarenessContext && setThreadDpiAwarenessContext) 
+        {
+            DPI_AWARENESS_CONTEXT previousContext = getThreadDpiAwarenessContext();
+            wasPerMonitorDpiAware = areDpiAwarenessContextsEqual(previousContext, DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+            if (!wasPerMonitorDpiAware) 
+            {
+                setThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+            }
+        }
+    }
+    
     WCHAR desktopPath[MAX_PATH];
     WCHAR fileName[MAX_PATH];
     time_t now;
@@ -208,7 +237,8 @@ void CaptureScreenToDesktop() {
     local_time = localtime(&now);
     
     // 获取桌面路径
-    if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_DESKTOP, NULL, 0, desktopPath))) {
+    if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_DESKTOP, NULL, 0, desktopPath))) 
+    {
         // 创建文件名 (格式: YYYY-MM-DD.png)
         swprintf(fileName, MAX_PATH, L"%s\\%04d-%02d-%02d.png", 
                  desktopPath, 
@@ -254,11 +284,29 @@ void CaptureScreenToDesktop() {
         DeleteDC(hdcMemDC);
         DeleteObject(hbmScreen);
         GdiplusShutdown(gdiplusToken);
+
+        // 恢复原来的DPI感知设置
+        if (hUser32 && !wasPerMonitorDpiAware) 
+        {
+            typedef DPI_AWARENESS_CONTEXT(WINAPI* SetThreadDpiAwarenessContextFunc)(DPI_AWARENESS_CONTEXT);
+            SetThreadDpiAwarenessContextFunc setThreadDpiAwarenessContext = 
+                (SetThreadDpiAwarenessContextFunc)GetProcAddress(hUser32, "SetThreadDpiAwarenessContext");
+            if (setThreadDpiAwarenessContext) 
+            {
+                setThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_UNAWARE);
+            }
+        }
+        
+        if (hUser32) 
+        {
+            FreeLibrary(hUser32);
+        }
     }
 }
 
 // 获取编码器CLSID的辅助函数
-int GetEncoderClsid(const WCHAR* format, CLSID* pClsid) {
+int GetEncoderClsid(const WCHAR* format, CLSID* pClsid) 
+{
     UINT num = 0;          // 编码器数量
     UINT size = 0;         // 编码器数组大小
     
@@ -274,8 +322,10 @@ int GetEncoderClsid(const WCHAR* format, CLSID* pClsid) {
     GetImageEncoders(num, size, pImageCodecInfo);
     
     // 寻找匹配的编码器
-    for(UINT j = 0; j < num; ++j) {
-        if(wcscmp(pImageCodecInfo[j].MimeType, format) == 0) {
+    for(UINT j = 0; j < num; ++j) 
+    {
+        if(wcscmp(pImageCodecInfo[j].MimeType, format) == 0) 
+        {
             *pClsid = pImageCodecInfo[j].Clsid;
             free(pImageCodecInfo);
             return j;
@@ -291,7 +341,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 {
     // 写入日志，证明程序确实启动了
     FILE *logFile = fopen(".\\LeaveWork_log.txt", "a");
-    if (logFile) {
+    if (logFile) 
+    {
         time_t now;
         struct tm *local_time;
         time(&now);
