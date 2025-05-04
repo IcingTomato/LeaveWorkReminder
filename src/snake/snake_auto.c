@@ -76,9 +76,108 @@ float elasticEaseOut(float t);
 void drawRoundedRect(SDL_Renderer* renderer, int x, int y, int w, int h, int radius, SDL_Color color);
 void autoPlay(); // 自动模式函数声明
 bool isMoveSafe(int direction); // 检查移动是否安全
+int countOpenSpace(int startX, int startY, int maxDepth); // 计算开放空间
+bool isOccupied(int x, int y); // 检查位置是否被占用
 
 // 自动寻路函数 贪心算法 
 // https://zh.wikipedia.org/zh-cn/%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95#:~:text=%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95%EF%BC%88%E8%8B%B1%E8%AF%AD%EF%BC%9Agreedy%20algorithm,%E5%B0%B1%E6%98%AF%E4%B8%80%E7%A7%8D%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95%E3%80%82&text=%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95%E5%9C%A8%E6%9C%89%E6%9C%80,%E7%9A%84%E9%97%AE%E9%A2%98%E4%B8%AD%E5%B0%A4%E4%B8%BA%E6%9C%89%E6%95%88%E3%80%82
+// void autoPlay() 
+// {
+//     if (!autoMode || gameOver) return;
+    
+//     // 获取当前蛇头位置
+//     int headX = snake.x[0];
+//     int headY = snake.y[0];
+    
+//     // 计算蛇头与食物的相对位置
+//     int deltaX = food.x - headX;
+//     int deltaY = food.y - headY;
+    
+//     // 存储可能的移动方向
+//     int possibleDirections[4] = {0};
+//     int dirCount = 0;
+    
+//     // 优先考虑X轴移动
+//     if (deltaX > 0 && snake.direction != LEFT) 
+//     {
+//         possibleDirections[dirCount++] = RIGHT;
+//     } 
+//     else if (deltaX < 0 && snake.direction != RIGHT) 
+//     {
+//         possibleDirections[dirCount++] = LEFT;
+//     }
+    
+//     // 其次考虑Y轴移动
+//     if (deltaY > 0 && snake.direction != UP) 
+//     {
+//         possibleDirections[dirCount++] = DOWN;
+//     } 
+//     else if (deltaY < 0 && snake.direction != DOWN) 
+//     {
+//         possibleDirections[dirCount++] = UP;
+//     }
+    
+//     // 如果没有可行的方向，考虑水平或垂直移动
+//     if (dirCount == 0) 
+//     {
+//         if (snake.direction != LEFT && snake.direction != RIGHT) 
+//         {
+//             // 当前垂直移动，尝试水平移动
+//             if (isMoveSafe(RIGHT)) 
+//             {
+//                 possibleDirections[dirCount++] = RIGHT;
+//             } 
+//             else if (isMoveSafe(LEFT)) 
+//             {
+//                 possibleDirections[dirCount++] = LEFT;
+//             }
+//         } 
+//         else 
+//         {
+//             // 当前水平移动，尝试垂直移动
+//             if (isMoveSafe(UP)) 
+//             {
+//                 possibleDirections[dirCount++] = UP;
+//             } 
+//             else if (isMoveSafe(DOWN)) 
+//             {
+//                 possibleDirections[dirCount++] = DOWN;
+//             }
+//         }
+//     }
+    
+//     // 检查选择的方向是否安全（不会撞到蛇身）
+//     for (int i = 0; i < dirCount; i++) 
+//     {
+//         if (isMoveSafe(possibleDirections[i])) 
+//         {
+//             snake.direction = possibleDirections[i];
+//             return;
+//         }
+//     }
+    
+//     // 如果以上方向都不安全，尝试任意安全方向
+//     if (snake.direction != UP && isMoveSafe(DOWN)) 
+//     {
+//         snake.direction = DOWN;
+//     } 
+//     else if (snake.direction != DOWN && isMoveSafe(UP)) 
+//     {
+//         snake.direction = UP;
+//     } 
+//     else if (snake.direction != LEFT && isMoveSafe(RIGHT)) 
+//     {
+//         snake.direction = RIGHT;
+//     } 
+//     else if (snake.direction != RIGHT && isMoveSafe(LEFT)) 
+//     {
+//         snake.direction = LEFT;
+//     }
+    
+//     // 如果没有安全方向，保持当前方向（可能会导致游戏结束）
+// }
+
+// 改进自动寻路函数
 void autoPlay() 
 {
     if (!autoMode || gameOver) return;
@@ -87,92 +186,241 @@ void autoPlay()
     int headX = snake.x[0];
     int headY = snake.y[0];
     
+    // 获取蛇尾位置
+    int tailX = snake.x[snake.length - 1];
+    int tailY = snake.y[snake.length - 1];
+    
     // 计算蛇头与食物的相对位置
     int deltaX = food.x - headX;
     int deltaY = food.y - headY;
+    
+    // 判断是否处于紧急状态 (安全方向少于2个)
+    int safeDirections = 0;
+    if (isMoveSafe(UP)) safeDirections++;
+    if (isMoveSafe(DOWN)) safeDirections++;
+    if (isMoveSafe(LEFT)) safeDirections++;
+    if (isMoveSafe(RIGHT)) safeDirections++;
+    
+    bool emergency = (safeDirections < 2);
+    
+    // 在紧急状态下，尝试跟随尾巴
+    if (emergency) 
+    {
+        // 计算到尾巴的方向
+        int tailDeltaX = tailX - headX;
+        int tailDeltaY = tailY - headY;
+        
+        // 优先选择朝向尾巴的方向
+        if (tailDeltaX > 0 && snake.direction != LEFT && isMoveSafe(RIGHT)) 
+        {
+            snake.direction = RIGHT;
+            return;
+        } 
+        else if (tailDeltaX < 0 && snake.direction != RIGHT && isMoveSafe(LEFT)) {
+            snake.direction = LEFT;
+            return;
+        }
+        else if (tailDeltaY > 0 && snake.direction != UP && isMoveSafe(DOWN)) 
+        {
+            snake.direction = DOWN;
+            return;
+        }
+        else if (tailDeltaY < 0 && snake.direction != DOWN && isMoveSafe(UP)) 
+        {
+            snake.direction = UP;
+            return;
+        }
+    }
     
     // 存储可能的移动方向
     int possibleDirections[4] = {0};
     int dirCount = 0;
     
-    // 优先考虑X轴移动
-    if (deltaX > 0 && snake.direction != LEFT) 
-    {
-        possibleDirections[dirCount++] = RIGHT;
-    } 
-    else if (deltaX < 0 && snake.direction != RIGHT) 
-    {
-        possibleDirections[dirCount++] = LEFT;
-    }
+    // 保存每个方向的评分 (越高越好)
+    int dirScores[4] = {0, 0, 0, 0}; // UP, DOWN, LEFT, RIGHT
     
-    // 其次考虑Y轴移动
-    if (deltaY > 0 && snake.direction != UP) 
-    {
-        possibleDirections[dirCount++] = DOWN;
-    } 
-    else if (deltaY < 0 && snake.direction != DOWN) 
+    // 评估四个方向
+    if (isMoveSafe(UP)) 
     {
         possibleDirections[dirCount++] = UP;
+        // 如果向上移动离食物更近，加分
+        if (deltaY < 0) dirScores[0] += 2;
     }
     
-    // 如果没有可行的方向，考虑水平或垂直移动
-    if (dirCount == 0) 
+    if (isMoveSafe(DOWN)) 
     {
-        if (snake.direction != LEFT && snake.direction != RIGHT) 
-        {
-            // 当前垂直移动，尝试水平移动
-            if (isMoveSafe(RIGHT)) 
-            {
-                possibleDirections[dirCount++] = RIGHT;
-            } 
-            else if (isMoveSafe(LEFT)) 
-            {
-                possibleDirections[dirCount++] = LEFT;
-            }
-        } 
-        else 
-        {
-            // 当前水平移动，尝试垂直移动
-            if (isMoveSafe(UP)) 
-            {
-                possibleDirections[dirCount++] = UP;
-            } 
-            else if (isMoveSafe(DOWN)) 
-            {
-                possibleDirections[dirCount++] = DOWN;
-            }
-        }
+        possibleDirections[dirCount++] = DOWN;
+        if (deltaY > 0) dirScores[1] += 2;
     }
     
-    // 检查选择的方向是否安全（不会撞到蛇身）
+    if (isMoveSafe(LEFT)) 
+    {
+        possibleDirections[dirCount++] = LEFT;
+        if (deltaX < 0) dirScores[2] += 2;
+    }
+    
+    if (isMoveSafe(RIGHT)) 
+    {
+        possibleDirections[dirCount++] = RIGHT;
+        if (deltaX > 0) dirScores[3] += 2;
+    }
+    
+    // 检查每个方向移动后的开放空间
     for (int i = 0; i < dirCount; i++) 
     {
-        if (isMoveSafe(possibleDirections[i])) 
+        int dir = possibleDirections[i];
+        int nextX = headX;
+        int nextY = headY;
+        
+        switch (dir) 
         {
-            snake.direction = possibleDirections[i];
-            return;
+            case UP:    nextY--; break;
+            case DOWN:  nextY++; break;
+            case LEFT:  nextX--; break;
+            case RIGHT: nextX++; break;
+        }
+        
+        // 处理穿墙
+        if (nextX < 0) nextX = WIDTH - 1;
+        if (nextX >= WIDTH) nextX = 0;
+        if (nextY < 0) nextY = HEIGHT - 1;
+        if (nextY >= HEIGHT) nextY = 0;
+        
+        // 计算该位置的开放空间
+        int openSpace = countOpenSpace(nextX, nextY, 5);
+        
+        // 根据开放空间加分 (最多加5分)
+        if (dir == UP) dirScores[0] += (openSpace > 5) ? 5 : openSpace;
+        else if (dir == DOWN) dirScores[1] += (openSpace > 5) ? 5 : openSpace;
+        else if (dir == LEFT) dirScores[2] += (openSpace > 5) ? 5 : openSpace;
+        else if (dir == RIGHT) dirScores[3] += (openSpace > 5) ? 5 : openSpace;
+    }
+    
+    // 选择评分最高的方向
+    int bestDir = -1;
+    int bestScore = -1;
+    
+    for (int i = 0; i < dirCount; i++) 
+    {
+        int dir = possibleDirections[i];
+        int score = 0;
+        
+        if (dir == UP) score = dirScores[0];
+        else if (dir == DOWN) score = dirScores[1];
+        else if (dir == LEFT) score = dirScores[2];
+        else if (dir == RIGHT) score = dirScores[3];
+        
+        // 避免与当前方向相反
+        if ((dir == UP && snake.direction == DOWN) ||
+            (dir == DOWN && snake.direction == UP) ||
+            (dir == LEFT && snake.direction == RIGHT) ||
+            (dir == RIGHT && snake.direction == LEFT)) 
+        {
+            score -= 10; // 大幅降低掉头的评分
+        }
+        
+        // 保持当前方向有加分
+        if (dir == snake.direction) 
+        {
+            score += 1;
+        }
+        
+        if (score > bestScore) 
+        {
+            bestScore = score;
+            bestDir = dir;
         }
     }
     
-    // 如果以上方向都不安全，尝试任意安全方向
-    if (snake.direction != UP && isMoveSafe(DOWN)) 
+    // 如果找到最佳方向，就采用
+    if (bestDir != -1) 
     {
-        snake.direction = DOWN;
+        snake.direction = bestDir;
     } 
-    else if (snake.direction != DOWN && isMoveSafe(UP)) 
+    else 
     {
-        snake.direction = UP;
-    } 
-    else if (snake.direction != LEFT && isMoveSafe(RIGHT)) 
+        // 如果没有找到安全方向，随机选择一个方向
+        // (这种情况一般是没有任何安全方向了，游戏很快会结束)
+        int randDir = rand() % 4 + 1; // 1-4
+        snake.direction = randDir;
+    }
+}
+
+// 计算某个位置的开放空间大小
+int countOpenSpace(int startX, int startY, int maxDepth) 
+{
+    // 如果起始位置就不安全，返回0
+    if (isOccupied(startX, startY)) return 0;
+    
+    int count = 0;
+    int depth = 0;
+    int visited[WIDTH][HEIGHT] = {0};
+    
+    // 创建队列进行广度优先搜索
+    typedef struct {
+        int x, y, depth;
+    } QueueItem;
+    
+    QueueItem queue[WIDTH * HEIGHT];
+    int front = 0, rear = 0;
+    
+    // 添加起始点
+    queue[rear].x = startX;
+    queue[rear].y = startY;
+    queue[rear].depth = 0;
+    rear++;
+    visited[startX][startY] = 1;
+    
+    // 四个方向: 上、下、左、右
+    int dx[] = {0, 0, -1, 1};
+    int dy[] = {-1, 1, 0, 0};
+    
+    while (front < rear) 
     {
-        snake.direction = RIGHT;
-    } 
-    else if (snake.direction != RIGHT && isMoveSafe(LEFT)) 
-    {
-        snake.direction = LEFT;
+        QueueItem current = queue[front++];
+        count++;
+        
+        // 达到最大深度就停止
+        if (current.depth >= maxDepth) continue;
+        
+        // 检查四个方向
+        for (int i = 0; i < 4; i++) 
+        {
+            int newX = current.x + dx[i];
+            int newY = current.y + dy[i];
+            
+            // 处理穿墙
+            if (newX < 0) newX = WIDTH - 1;
+            if (newX >= WIDTH) newX = 0;
+            if (newY < 0) newY = HEIGHT - 1;
+            if (newY >= HEIGHT) newY = 0;
+            
+            // 如果未访问且不是蛇身
+            if (!visited[newX][newY] && !isOccupied(newX, newY)) 
+            {
+                visited[newX][newY] = 1;
+                queue[rear].x = newX;
+                queue[rear].y = newY;
+                queue[rear].depth = current.depth + 1;
+                rear++;
+            }
+        }
     }
     
-    // 如果没有安全方向，保持当前方向（可能会导致游戏结束）
+    return count;
+}
+
+// 检查位置是否被占用(蛇身)
+bool isOccupied(int x, int y) 
+{
+    for (int i = 0; i < snake.length; i++) 
+    {
+        if (x == snake.x[i] && y == snake.y[i]) 
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 // 检查移动是否安全
